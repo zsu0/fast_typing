@@ -104,7 +104,7 @@ class TypingApp:
         else:
             self.root.after(1000, self.update_timer)
 
-   def end_test(self):
+    def end_test(self):
         self.test_running = False
         self.input_entry.config(state='disabled')
         
