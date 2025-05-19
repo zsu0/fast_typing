@@ -11,7 +11,7 @@ class TypingApp:
 
         all_words = []
         for level, weight in {'A': 0.45, 'B': 0.40, 'C': 0.15}.items():
-            level_words = random.choices(words_by_level[level], k=int(100 * weight))
+            level_words = random.choices(words_by_level[level], k=int(300 * weight))
             all_words.extend(level_words)
         
         random.shuffle(all_words)
