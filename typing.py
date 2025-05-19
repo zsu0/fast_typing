@@ -32,7 +32,7 @@ class TypingApp:
         self.status_label = tk.Label(root, text="", font=("Helvetica", 12))
         self.status_label.pack(pady=10)
 
-        self.try_again_button = tk.Button(root, text="Try Again", command=self.reset, font=("Helvetica", 12))
+        self.try_again_button = tk.Button(root, text="Try Again", command=self.reset_test, font=("Helvetica", 12))
         self.leaderboard_button = tk.Button(root, text="Enter Leaderboard", command=self.enter_leaderboard, font=("Helvetica", 12))
         self.leaderboard_display = tk.Label(root, text="", font=("Helvetica", 12), justify="left")
 
