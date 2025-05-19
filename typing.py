@@ -21,6 +21,7 @@ class TypingApp:
         self.current_paragraph_index = 0
         self.current_word_index = 0
         self.correct_count = 0
+        self.incorrect_count = 0
         self.start_time = None
 
         self.text_display = tk.Text(root, height=10, width=80, font=("Helvetica", 14))
@@ -76,6 +77,8 @@ class TypingApp:
 
         if typed == current_word:
             self.correct_count += 1
+        else:
+            self.incorrect_count += 1
         self.input_entry.delete(0, tk.END)
         self.current_word_index += 1
 
@@ -107,14 +110,14 @@ class TypingApp:
     
         elapsed = int(time.time() - self.start_time)
         elapsed = max(1, elapsed)  # Prevent divide by zero
-        wpm = int((self.correct_words / elapsed) * 60)
+        wpm = int((self.correct_count / elapsed) * 60)
     
-        total_attempted = self.correct_words + self.incorrect_words
+        total_attempted = self.correct_count + self.incorrect_count
     
         self.result_label = tk.Label(self.root, text=f"Your WPM: {wpm}", font=("Helvetica", 16))
         self.result_label.pack(pady=10)
     
-        self.score_label = tk.Label(self.root, text=f"Correct: {self.correct_words} / {total_attempted} words in 1 minute", font=("Helvetica", 12))
+        self.score_label = tk.Label(self.root, text=f"Correct: {self.correct_count} / {total_attempted} words in 1 minute", font=("Helvetica", 12))
         self.score_label.pack(pady=5)
     
         leaderboard_button = tk.Button(self.root, text="Enter Leaderboard", command=self.show_leaderboard_entry)
@@ -153,6 +156,7 @@ class TypingApp:
         self.current_paragraph_index = 0
         self.current_word_index = 0
         self.correct_count = 0
+        self.incorrect_count = 0
 
         random.shuffle(self.words)
         self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
