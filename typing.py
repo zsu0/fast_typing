@@ -2,6 +2,11 @@ import tkinter as tk
 import random
 import time
 from lexical import words_by_level
+level_weights = {
+    'A': 0.45,
+    'B': 0.40,
+    'C': 0.15
+}
 
 class TypingApp:
     def __init__(self, root):
@@ -9,7 +14,9 @@ class TypingApp:
         self.root.title("Fast Typing")
         self.root.geometry("800x400")
 
-        self.level = 1
+        level_choices = list(level_weights.keys())
+        weights = list(level_weights.values())
+        self.level = random.choices(level_choices, weights=weights, k=1)[0]
         self.words = words_by_level[self.level]
         self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
         self.current_paragraph_index = 0
