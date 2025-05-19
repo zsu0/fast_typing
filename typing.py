@@ -9,10 +9,13 @@ class TypingApp:
         self.root.title("Fast Typing")
         self.root.geometry("800x400")
 
-        level_weights = {'A': 0.45, 'B': 0.40, 'C': 0.15}
-        self.level = random.choices(list(level_weights.keys()), weights=list(level_weights.values()), k=1)[0]
-        self.words = words_by_level[self.level]
-        random.shuffle(self.words)
+        all_words = []
+        for level, weight in {'A': 0.45, 'B': 0.40, 'C': 0.15}.items():
+            level_words = random.choices(words_by_level[level], k=int(100 * weight))
+            all_words.extend(level_words)
+        
+        random.shuffle(all_words)
+        self.words = all_words
 
         self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
         self.current_paragraph_index = 0
