@@ -2,11 +2,6 @@ import tkinter as tk
 import random
 import time
 from lexical import words_by_level
-level_weights = {
-    'A': 0.45,
-    'B': 0.40,
-    'C': 0.15
-}
 
 class TypingApp:
     def __init__(self, root):
@@ -14,157 +9,146 @@ class TypingApp:
         self.root.title("Fast Typing")
         self.root.geometry("800x400")
 
-        level_choices = list(level_weights.keys())
-        weights = list(level_weights.values())
-        self.level = random.choices(level_choices, weights=weights, k=1)[0]
+        level_weights = {'A': 0.45, 'B': 0.40, 'C': 0.15}
+        self.level = random.choices(list(level_weights.keys()), weights=list(level_weights.values()), k=1)[0]
         self.words = words_by_level[self.level]
+        random.shuffle(self.words)
+
         self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
         self.current_paragraph_index = 0
         self.current_word_index = 0
-        self.correct_words = 0
+        self.correct_count = 0
         self.start_time = None
-        self.time_limit = 60  # 1 minute
-        self.timer_running = False
+
+        self.text_display = tk.Text(root, height=10, width=80, font=("Helvetica", 14))
+        self.text_display.pack(pady=10)
+        self.text_display.config(state=tk.DISABLED)
+
+        self.input_entry = tk.Entry(root, font=("Helvetica", 14))
+        self.input_entry.pack()
+        self.input_entry.bind("<space>", self.check_word)
+        self.input_entry.bind("<Return>", self.check_word)
+
+        self.status_label = tk.Label(root, text="", font=("Helvetica", 12))
+        self.status_label.pack(pady=10)
+
+        self.try_again_button = tk.Button(root, text="Try Again", command=self.reset, font=("Helvetica", 12))
+        self.leaderboard_button = tk.Button(root, text="Enter Leaderboard", command=self.enter_leaderboard, font=("Helvetica", 12))
+        self.leaderboard_display = tk.Label(root, text="", font=("Helvetica", 12), justify="left")
+
         self.leaderboard = []
 
-        self.create_widgets()
-        self.load_paragraphs()
+        self.update_paragraphs()
 
-    def create_widgets(self):
-        self.text_frame = tk.Frame(self.root)
-        self.text_frame.pack(pady=10)
+    def update_paragraphs(self):
+        self.text_display.config(state=tk.NORMAL)
+        self.text_display.delete("1.0", tk.END)
+        to_show = self.paragraphs[self.current_paragraph_index:self.current_paragraph_index+2]
+        for p in to_show:
+            self.text_display.insert(tk.END, " ".join(p) + "\n")
+        self.text_display.config(state=tk.DISABLED)
+        self.highlight_current_word()
 
-        self.paragraph_labels = [tk.Label(self.text_frame, text="", font=("Arial", 16)) for _ in range(2)]
-        for label in self.paragraph_labels:
-            label.pack(anchor="w")
+    def highlight_current_word(self):
+        self.text_display.config(state=tk.NORMAL)
+        self.text_display.tag_remove("highlight", "1.0", tk.END)
 
-        self.entry = tk.Entry(self.root, font=("Arial", 16))
-        self.entry.pack(pady=10)
-        self.entry.bind("<KeyRelease>", self.check_word)
+        full_text = self.text_display.get("1.0", tk.END).split()
+        word_pos = sum(len(word)+1 for word in full_text[:self.current_word_index])
+        word_len = len(full_text[self.current_word_index])
 
-        self.timer_label = tk.Label(self.root, text="Time: 60", font=("Arial", 14))
-        self.timer_label.pack()
-
-        self.result_label = tk.Label(self.root, text="", font=("Arial", 16))
-        self.result_label.pack(pady=10)
-
-        self.leaderboard_frame = tk.Frame(self.root)
-        self.leaderboard_frame.pack(pady=10)
-
-    def load_paragraphs(self):
-        for i in range(2):
-            idx = self.current_paragraph_index + i
-            if idx < len(self.paragraphs):
-                self.paragraph_labels[i].config(text=self.format_paragraph(self.paragraphs[idx]))
-            else:
-                self.paragraph_labels[i].config(text="")
-
-    def format_paragraph(self, paragraph):
-        words = paragraph.copy()
-        if self.current_word_index < len(words) and self.current_paragraph_index == self.paragraphs.index(paragraph):
-            words[self.current_word_index] = f"[{words[self.current_word_index]}]"
-        return " ".join(words)
+        start_index = f"1.0 + {word_pos} chars"
+        end_index = f"1.0 + {word_pos + word_len} chars"
+        self.text_display.tag_add("highlight", start_index, end_index)
+        self.text_display.tag_config("highlight", background="yellow")
+        self.text_display.config(state=tk.DISABLED)
 
     def check_word(self, event):
-        if not self.timer_running:
-            self.start_timer()
+        if self.start_time is None:
             self.start_time = time.time()
+            self.root.after(1000, self.update_timer)
 
-        typed_word = self.entry.get().strip()
-        current_paragraph = self.paragraphs[self.current_paragraph_index]
-        current_word = current_paragraph[self.current_word_index]
+        typed = self.input_entry.get().strip()
+        current_word = self.paragraphs[self.current_paragraph_index][self.current_word_index]
 
-        # Check for premature typing or wrong typing
-        if not current_word.startswith(typed_word):
-            self.entry.delete(len(typed_word)-1, tk.END)
-            return
+        if typed == current_word:
+            self.correct_count += 1
+        self.input_entry.delete(0, tk.END)
+        self.current_word_index += 1
 
-        if typed_word == current_word:
-            self.correct_words += 1
-            self.current_word_index += 1
-            self.entry.delete(0, tk.END)
+        if self.current_word_index >= len(self.paragraphs[self.current_paragraph_index]):
+            self.current_paragraph_index += 1
+            self.current_word_index = 0
 
-            if self.current_word_index == len(current_paragraph):
-                self.current_paragraph_index += 1
-                self.current_word_index = 0
+            if self.current_paragraph_index >= len(self.paragraphs):
+                self.end_test()
+                return
 
-            self.load_paragraphs()
-
-    def start_timer(self):
-        self.timer_running = True
-        self.update_timer()
+            self.update_paragraphs()
+        else:
+            self.highlight_current_word()
 
     def update_timer(self):
-        elapsed = int(time.time() - self.start_time)
-        remaining = self.time_limit - elapsed
-        self.timer_label.config(text=f"Time: {remaining}")
+        if self.start_time is None:
+            return
 
-        if remaining > 0:
-            self.root.after(1000, self.update_timer)
-        else:
+        elapsed = time.time() - self.start_time
+        if elapsed >= 60:
             self.end_test()
+        else:
+            self.root.after(1000, self.update_timer)
 
     def end_test(self):
-        self.timer_running = False
-        wpm = self.correct_words
-        self.result_label.config(text=f"Your WPM: {wpm}")
-        self.entry.config(state="disabled")
+        self.input_entry.config(state=tk.DISABLED)
+        elapsed = max(1, time.time() - self.start_time)
+        wpm = int(self.correct_count / (elapsed / 60))
+        self.status_label.config(text=f"Test complete! WPM: {wpm}")
 
-        self.show_post_test_options(wpm)
+        self.try_again_button.pack()
+        self.leaderboard_button.pack()
+        self.current_wpm = wpm
 
-    def show_post_test_options(self, wpm):
-        self.leaderboard_frame.destroy()
-        self.leaderboard_frame = tk.Frame(self.root)
-        self.leaderboard_frame.pack(pady=10)
-
-        tk.Button(self.leaderboard_frame, text="Enter name for leaderboard", command=lambda: self.prompt_leaderboard(wpm)).pack()
-        tk.Button(self.leaderboard_frame, text="Try Again", command=self.try_again).pack(pady=5)
-
-    def prompt_leaderboard(self, wpm):
-        self.entry_window = tk.Toplevel(self.root)
-        self.entry_window.title("Enter Name")
-
-        tk.Label(self.entry_window, text="Enter your name:").pack()
-        name_entry = tk.Entry(self.entry_window)
+    def enter_leaderboard(self):
+        name_window = tk.Toplevel(self.root)
+        name_window.title("Enter Name")
+        tk.Label(name_window, text="Enter your name:").pack()
+        name_entry = tk.Entry(name_window)
         name_entry.pack()
-        tk.Button(self.entry_window, text="Submit", command=lambda: self.submit_leaderboard(name_entry.get(), wpm)).pack()
 
-    def submit_leaderboard(self, name, wpm):
-        name = name.strip()
-        if not name or any(entry[0] == name for entry in self.leaderboard):
-            return
-        self.leaderboard.append((name, wpm))
-        self.leaderboard.sort(key=lambda x: x[1], reverse=True)
-        self.entry_window.destroy()
-        self.show_leaderboard()
+        def submit_name():
+            name = name_entry.get()
+            if name and all(n != name for n, _ in self.leaderboard):
+                self.leaderboard.append((name, self.current_wpm))
+                self.leaderboard.sort(key=lambda x: x[1], reverse=True)
+                self.show_leaderboard()
+            name_window.destroy()
+
+        tk.Button(name_window, text="Submit", command=submit_name).pack()
 
     def show_leaderboard(self):
-        for widget in self.leaderboard_frame.winfo_children():
-            widget.destroy()
+        text = "Leaderboard:\n"
+        for idx, (name, wpm) in enumerate(self.leaderboard, 1):
+            text += f"#{idx} {name} {wpm} wpm\n"
+        self.leaderboard_display.config(text=text)
+        self.leaderboard_display.pack()
 
-        tk.Label(self.leaderboard_frame, text="Leaderboard:", font=("Arial", 14, "bold")).pack()
-        for i, (name, wpm) in enumerate(self.leaderboard, 1):
-            tk.Label(self.leaderboard_frame, text=f"#{i} {name} {wpm} wpm").pack()
-
-        tk.Button(self.leaderboard_frame, text="Try Again", command=self.try_again).pack(pady=5)
-
-    def try_again(self):
-        self.words = words_by_level[self.level]
-        self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
+    def reset(self):
+        self.start_time = None
         self.current_paragraph_index = 0
         self.current_word_index = 0
-        self.correct_words = 0
-        self.start_time = None
-        self.timer_running = False
+        self.correct_count = 0
 
-        for label in self.paragraph_labels:
-            label.config(text="")
+        random.shuffle(self.words)
+        self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
 
-        self.entry.config(state="normal")
-        self.entry.delete(0, tk.END)
-        self.result_label.config(text="")
-        self.load_paragraphs()
-        self.timer_label.config(text="Time: 60")
+        self.input_entry.config(state=tk.NORMAL)
+        self.input_entry.delete(0, tk.END)
+        self.status_label.config(text="")
+        self.try_again_button.pack_forget()
+        self.leaderboard_button.pack_forget()
+        self.leaderboard_display.pack_forget()
+
+        self.update_paragraphs()
 
 if __name__ == "__main__":
     root = tk.Tk()
