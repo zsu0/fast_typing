@@ -107,22 +107,22 @@ class TypingApp:
    def end_test(self):
         self.test_running = False
         self.input_entry.config(state='disabled')
-    
+        
         elapsed = int(time.time() - self.start_time)
         elapsed = max(1, elapsed)  # Prevent divide by zero
         wpm = int((self.correct_count / elapsed) * 60)
-    
+        
         total_attempted = self.correct_count + self.incorrect_count
-    
+        
         self.result_label = tk.Label(self.root, text=f"Your WPM: {wpm}", font=("Helvetica", 16))
         self.result_label.pack(pady=10)
-    
+        
         self.score_label = tk.Label(self.root, text=f"Correct: {self.correct_count} / {total_attempted} words in 1 minute", font=("Helvetica", 12))
         self.score_label.pack(pady=5)
-    
+        
         leaderboard_button = tk.Button(self.root, text="Enter Leaderboard", command=self.show_leaderboard_entry)
         leaderboard_button.pack(pady=5)
-    
+        
         try_again_button = tk.Button(self.root, text="Try Again", command=self.reset_test)
         try_again_button.pack(pady=5)
 
