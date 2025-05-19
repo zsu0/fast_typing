@@ -9,6 +9,7 @@ class TypingApp:
         self.root.title("Fast Typing")
         self.root.geometry("800x600")
 
+        # Initialize word lists
         all_words = []
         for level, weight in {'A': 0.45, 'B': 0.40, 'C': 0.15}.items():
             level_words = random.choices(words_by_level[level], k=int(300 * weight))
@@ -18,8 +19,7 @@ class TypingApp:
         self.words = all_words
         self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
 
-        self.reset_test_vars()
-
+        # Initialize UI elements
         self.text_display = tk.Text(root, height=10, width=80, font=("Helvetica", 14))
         self.text_display.pack(pady=10)
         self.text_display.config(state=tk.DISABLED)
@@ -32,12 +32,16 @@ class TypingApp:
         self.status_label = tk.Label(root, text="", font=("Helvetica", 12))
         self.status_label.pack(pady=10)
 
+        # Add missing labels
+        self.result_label = tk.Label(root, text="", font=("Helvetica", 14))
+        self.score_label = tk.Label(root, text="", font=("Helvetica", 12))
+
         self.try_again_button = tk.Button(root, text="Try Again", command=self.reset_test, font=("Helvetica", 12))
         self.leaderboard_button = tk.Button(root, text="Enter Leaderboard", command=self.enter_leaderboard, font=("Helvetica", 12))
         self.leaderboard_display = tk.Label(root, text="", font=("Helvetica", 12), justify="left")
 
         self.leaderboard = []
-
+        self.reset_test_vars()
         self.update_paragraphs()
 
     def reset_test_vars(self):
@@ -47,8 +51,13 @@ class TypingApp:
         self.incorrect_count = 0
         self.start_time = None
         self.test_running = True
+        self.timer_id = None  # To track the timer
 
     def update_paragraphs(self):
+        if self.current_paragraph_index >= len(self.paragraphs):
+            self.end_test()
+            return
+
         self.text_display.config(state=tk.NORMAL)
         self.text_display.delete("1.0", tk.END)
         to_show = self.paragraphs[self.current_paragraph_index:self.current_paragraph_index+2]
@@ -62,6 +71,9 @@ class TypingApp:
         self.text_display.tag_remove("highlight", "1.0", tk.END)
 
         full_text = self.text_display.get("1.0", tk.END).split()
+        if self.current_word_index >= len(full_text):
+            return
+
         word_pos = sum(len(word)+1 for word in full_text[:self.current_word_index])
         word_len = len(full_text[self.current_word_index])
 
@@ -77,7 +89,7 @@ class TypingApp:
             
         if self.start_time is None:
             self.start_time = time.time()
-            self.root.after(1000, self.update_timer)
+            self.timer_id = self.root.after(1000, self.update_timer)
 
         typed = self.input_entry.get().strip()
         current_word = self.paragraphs[self.current_paragraph_index][self.current_word_index]
@@ -93,28 +105,27 @@ class TypingApp:
         if self.current_word_index >= len(self.paragraphs[self.current_paragraph_index]):
             self.current_paragraph_index += 1
             self.current_word_index = 0
-
-            if self.current_paragraph_index >= len(self.paragraphs):
-                self.end_test()
-                return
-
             self.update_paragraphs()
         else:
             self.highlight_current_word()
 
     def update_timer(self):
-        if not self.start_time:
+        if not self.test_running or not self.start_time:
             return
+            
         elapsed = time.time() - self.start_time
         if elapsed >= 60:
             self.end_test()
         else:
-            self.root.after(1000, self.update_timer)
+            self.timer_id = self.root.after(1000, self.update_timer)
 
     def end_test(self):
+        if self.timer_id:
+            self.root.after_cancel(self.timer_id)
+            
         self.test_running = False
         self.input_entry.config(state='disabled')
-        elapsed = max(1, time.time() - self.start_time)  # Prevent divide by zero
+        elapsed = max(1, time.time() - self.start_time)
         self.current_wpm = int((self.correct_count / elapsed) * 60)
         total_attempted = self.correct_count + self.incorrect_count
 
@@ -127,7 +138,6 @@ class TypingApp:
         self.leaderboard_button.pack(pady=5)
         self.try_again_button.pack(pady=5)
 
-
     def enter_leaderboard(self):
         name_window = tk.Toplevel(self.root)
         name_window.title("Enter Name")
@@ -137,7 +147,7 @@ class TypingApp:
 
         def submit_name():
             name = name_entry.get().strip()
-            if name and all(n != name for n, _ in self.leaderboard):
+            if name:  # Removed strict duplicate check
                 self.leaderboard.append((name, self.current_wpm))
                 self.leaderboard.sort(key=lambda x: x[1], reverse=True)
                 self.show_leaderboard()
@@ -147,7 +157,7 @@ class TypingApp:
 
     def show_leaderboard(self):
         text = "Leaderboard:\n"
-        for idx, (name, wpm) in enumerate(self.leaderboard, 1):
+        for idx, (name, wpm) in enumerate(self.leaderboard[:10], 1):  # Show top 10 only
             text += f"#{idx} {name} - {wpm} WPM\n"
         self.leaderboard_display.config(text=text)
         self.leaderboard_display.pack()
@@ -159,10 +169,6 @@ class TypingApp:
 
         self.input_entry.config(state=tk.NORMAL)
         self.input_entry.delete(0, tk.END)
-
-        self.text_display.config(state=tk.NORMAL)
-        self.text_display.delete("1.0", tk.END)
-        self.text_display.config(state=tk.DISABLED)
 
         self.result_label.pack_forget()
         self.score_label.pack_forget()
