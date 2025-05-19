@@ -40,6 +40,14 @@ class TypingApp:
 
         self.update_paragraphs()
 
+    def reset_test_vars(self):
+        self.current_paragraph_index = 0
+        self.current_word_index = 0
+        self.correct_count = 0
+        self.incorrect_count = 0
+        self.start_time = None
+        self.test_running = True
+
     def update_paragraphs(self):
         self.text_display.config(state=tk.NORMAL)
         self.text_display.delete("1.0", tk.END)
