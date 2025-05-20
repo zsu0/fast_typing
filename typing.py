@@ -16,7 +16,7 @@ class TypingApp:
         self.frame_color = "#5A8F5E"  # Dark green outline
         self.highlight_color = "#E0B068"  # Yellow for highlight
         self.highlight_dark = "#D9A560"  # Darker yellow for outlines
-        self.text_color = "653F27"  # Dark brown text
+        self.text_color = "#653F27"  # Dark brown text
         self.timer_color = "#FFFDF6"  # White for timer
         
         # Initialize variables
