@@ -7,7 +7,7 @@ class TypingApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Fast Typing")
-        self.root.geometry("900x800")  # Increased window size
+        self.root.geometry("700x800")  # Adjusted window size
         self.root.configure(bg="#A0C878")  # Dark green background
         
         # Color scheme
@@ -24,10 +24,10 @@ class TypingApp:
         self.paragraphs = []
         self.leaderboard = []
         
-        # Create main canvas with expanded size
+        # Create main canvas with adjusted size
         self.canvas = tk.Canvas(
             root,
-            width=800,
+            width=650,
             height=700,
             bg=self.bg_color,
             highlightthickness=0
@@ -60,7 +60,7 @@ class TypingApp:
         # Then draw the fill
         return canvas.create_polygon(points, **kwargs, smooth=True)
     
-    def create_rounded_button(self, canvas, x, y, text, command, radius=20, **kwargs):
+    def create_rounded_button(self, canvas, x, y, text, command, radius=15, font_size=12, **kwargs):
         """Create a button with rounded corners and outline"""
         btn_frame = tk.Frame(canvas, bg=self.bg_color)
         btn_frame.place(x=x, y=y, anchor=tk.CENTER)
@@ -69,15 +69,14 @@ class TypingApp:
             btn_frame,
             text=text,
             command=command,
-            font=("Helvetica", 14),
             bg=self.highlight_color,
             fg=self.text_color,
             activebackground="#FCEFCB",
             relief="flat",
-            padx=20,
-            pady=10,
+            padx=15,
+            pady=8,
             bd=0,
-            **kwargs
+            font=("Helvetica", font_size)
         )
         btn.pack()
         
@@ -107,48 +106,40 @@ class TypingApp:
         # Draw main rounded rectangle (device screen)
         self.create_rounded_rectangle(
             self.canvas,
-            50, 50, 750, 650,  # Adjusted dimensions
-            radius=50,
+            25, 25, 625, 675,  # Adjusted dimensions
+            radius=40,
             fill=self.bg_color,
             outline=self.frame_color,
-            width=8
+            width=6
         )
         
         # Home page content
         title_label = tk.Label(
             self.canvas,
             text="Welcome to the Typing Speed Game", 
-            font=("Helvetica", 24, "bold"),
+            font=("Helvetica", 20, "bold"),
             bg=self.bg_color,
             fg=self.text_color
         )
-        self.canvas.create_window(450, 150, window=title_label)
+        self.canvas.create_window(325, 120, window=title_label)
         
         # Create rounded button
         self.create_rounded_button(
-            self.canvas, 450, 300,
+            self.canvas, 325, 250,
             "Start Typing Test",
-            self.start_typing_test
+            self.start_typing_test,
+            font_size=14
         )
         
         subtitle = tk.Label(
             self.canvas,
-            text="Test your typing speed in 1 minute", 
-            font=("Helvetica", 14),
+            text="Test your typing speed in 1 minute\nHow fast can you type?", 
+            font=("Helvetica", 12),
             bg=self.bg_color,
             fg=self.text_color
         )
-        self.canvas.create_window(450, 400, window=subtitle)
-        
-        # Add decorative elements
-        self.create_rounded_rectangle(
-            self.canvas,
-            350, 450, 550, 470,
-            radius=10,
-            fill=self.highlight_color,
-            outline=self.highlight_dark,
-            width=2
-        )
+        self.canvas.create_window(325, 350, window=subtitle)
+    
     
     def start_typing_test(self):
         """Initialize and show the typing test interface"""
@@ -158,7 +149,7 @@ class TypingApp:
         # Prepare word lists
         all_words = []
         for level, weight in {'A': 0.45, 'B': 0.40, 'C': 0.15}.items():
-            level_words = random.choices(words_by_level[level], k=int(300 * weight))
+            level_words = random.choices(words_by_level[level], k=int(200 * weight))  # Reduced word count
             all_words.extend(level_words)
         
         random.shuffle(all_words)
@@ -171,48 +162,48 @@ class TypingApp:
         # Draw main rounded rectangle (device screen)
         self.create_rounded_rectangle(
             self.canvas,
-            50, 50, 750, 650,  # Adjusted dimensions
-            radius=50,
+            25, 25, 625, 675,  # Adjusted dimensions
+            radius=40,
             fill=self.bg_color,
             outline=self.frame_color,
-            width=8
+            width=6
         )
         
         # Create smaller canvas (text display area)
         self.small_canvas = tk.Canvas(
             self.canvas,
-            width=700,
-            height=350,  # Increased height
+            width=550,
+            height=300,  # Adjusted height
             bg=self.screen_color,
             highlightthickness=0
         )
-        self.canvas.create_window(450, 300, window=self.small_canvas)
+        self.canvas.create_window(325, 250, window=self.small_canvas)
         
         # Create rounded rectangle for text display
         self.create_rounded_rectangle(
             self.small_canvas,
-            10, 10, 690, 340,  # Adjusted dimensions
-            radius=20,
+            10, 10, 540, 290,  # Adjusted dimensions
+            radius=15,
             fill=self.screen_color,
             outline=self.frame_color,
-            width=4
+            width=3
         )
         
         # Text display widget
         self.text_display = tk.Text(
             self.small_canvas,
-            height=15,
-            width=60,
-            font=("Helvetica", 14),
+            height=12,
+            width=50,
+            font=("Helvetica", 12),  # Smaller font
             wrap=tk.WORD,
             bg=self.screen_color,
             fg=self.text_color,  # Dark brown text
-            padx=20,
-            pady=20,
+            padx=15,
+            pady=15,
             highlightthickness=0,
             bd=0
         )
-        self.text_display.place(x=30, y=30, width=640, height=280)
+        self.text_display.place(x=25, y=25, width=500, height=240)
         self.text_display.config(state=tk.DISABLED)
         self.text_display.tag_config("highlight", background="yellow")
         
@@ -220,23 +211,23 @@ class TypingApp:
         self.time_label = tk.Label(
             self.canvas,
             text="01:00",
-            font=("Helvetica", 24, "bold"),
+            font=("Helvetica", 20, "bold"),
             fg=self.timer_color,
             bg=self.bg_color
         )
-        self.canvas.create_window(450, 150, window=self.time_label)
+        self.canvas.create_window(325, 120, window=self.time_label)
         
         # Input frame
         input_frame = tk.Frame(
             self.canvas,
             bg=self.bg_color
         )
-        self.canvas.create_window(450, 500, window=input_frame)
+        self.canvas.create_window(325, 450, window=input_frame)
         
         # Input entry with rounded corners
         self.input_entry = tk.Entry(
             input_frame,
-            font=("Helvetica", 16),
+            font=("Helvetica", 14),  # Smaller font
             bg="white",
             fg=self.text_color,
             relief="flat",
@@ -245,7 +236,7 @@ class TypingApp:
             highlightbackground=self.frame_color,
             highlightcolor=self.highlight_color
         )
-        self.input_entry.pack(padx=20, pady=10, ipady=8, ipadx=20)
+        self.input_entry.pack(padx=15, pady=8, ipady=6, ipadx=15)
         self.input_entry.bind("<space>", self.check_word)
         self.input_entry.bind("<Return>", self.check_word)
         self.input_entry.bind("<Key>", self.start_timer_on_first_key)
@@ -254,11 +245,11 @@ class TypingApp:
         self.status_label = tk.Label(
             self.canvas,
             text="",
-            font=("Helvetica", 12),
+            font=("Helvetica", 10),
             bg=self.bg_color,
             fg=self.text_color
         )
-        self.canvas.create_window(450, 550, window=self.status_label)
+        self.canvas.create_window(325, 500, window=self.status_label)
         
         # Initialize test
         self.update_paragraphs()
@@ -434,32 +425,34 @@ class TypingApp:
         self.result_label = tk.Label(
             self.canvas,
             text=f"Your WPM: {self.current_wpm}",
-            font=("Helvetica", 24, "bold"),
+            font=("Helvetica", 20, "bold"),
             bg=self.bg_color,
             fg=self.text_color
         )
-        self.canvas.create_window(450, 600, window=self.result_label)
+        self.canvas.create_window(325, 550, window=self.result_label)
 
         self.score_label = tk.Label(
             self.canvas,
             text=f"Correct: {self.correct_count} / {total_attempted} words",
-            font=("Helvetica", 16),
+            font=("Helvetica", 14),
             bg=self.bg_color,
             fg=self.text_color
         )
-        self.canvas.create_window(450, 640, window=self.score_label)
+        self.canvas.create_window(325, 590, window=self.score_label)
 
         # Create action buttons with rounded corners
         self.create_rounded_button(
-            self.canvas, 350, 680,
+            self.canvas, 250, 630,
             "Add to Leaderboard",
-            self.enter_leaderboard
+            self.enter_leaderboard,
+            font_size=12
         )
         
         self.create_rounded_button(
-            self.canvas, 550, 680,
+            self.canvas, 400, 630,
             "Try Again",
-            self.reset_test
+            self.reset_test,
+            font_size=12
         )
         
         self.time_label.config(text="00:00")
@@ -469,7 +462,7 @@ class TypingApp:
         """Show dialog to enter name for leaderboard"""
         self.name_window = tk.Toplevel(self.root)
         self.name_window.title("Enter Name")
-        self.name_window.geometry("400x200")
+        self.name_window.geometry("300x150")
         self.name_window.resizable(False, False)
         self.name_window.configure(bg=self.bg_color)
         self.name_window.grab_set()  # Make it modal
@@ -477,8 +470,8 @@ class TypingApp:
         # Create rounded container
         lb_canvas = tk.Canvas(
             self.name_window,
-            width=380,
-            height=180,
+            width=280,
+            height=130,
             bg=self.bg_color,
             highlightthickness=0
         )
@@ -486,42 +479,47 @@ class TypingApp:
         
         self.create_rounded_rectangle(
             lb_canvas,
-            10, 10, 370, 170,
-            radius=20,
+            10, 10, 270, 120,
+            radius=15,
             fill=self.screen_color,
             outline=self.frame_color,
-            width=3
+            width=2
         )
         
         tk.Label(
             lb_canvas,
             text="Enter your name:",
-            font=("Helvetica", 14),
+            font=("Helvetica", 12),
             bg=self.screen_color,
             fg=self.text_color
-        ).place(x=190, y=50, anchor=tk.CENTER)
+        ).place(x=140, y=40, anchor=tk.CENTER)
         
         self.name_entry = tk.Entry(
             lb_canvas,
-            font=("Helvetica", 14),
+            font=("Helvetica", 12),
             bg="white",
             fg=self.text_color,
             highlightthickness=1,
             highlightcolor=self.frame_color
         )
-        self.name_entry.place(x=190, y=90, anchor=tk.CENTER, width=300)
+        self.name_entry.place(x=140, y=70, anchor=tk.CENTER, width=200)
         self.name_entry.focus_set()
         
-        # Submit button
-        submit_btn = self.create_rounded_button(
-            lb_canvas, 190, 140,
-            "Submit",
-            self.submit_leaderboard_name,
-            radius=15,
-            font=("Helvetica", 12),
-            padx=15,
-            pady=5
+        # Submit button - fixed the font parameter issue
+        submit_btn = tk.Button(
+            lb_canvas,
+            text="Submit",
+            command=self.submit_leaderboard_name,
+            font=("Helvetica", 10),
+            bg=self.highlight_color,
+            fg=self.text_color,
+            activebackground="#FCEFCB",
+            relief="flat",
+            padx=10,
+            pady=5,
+            bd=0
         )
+        submit_btn.place(x=140, y=100, anchor=tk.CENTER)
 
     def submit_leaderboard_name(self):
         """Handle leaderboard name submission"""
@@ -540,11 +538,11 @@ class TypingApp:
         # Create rounded container
         self.create_rounded_rectangle(
             self.canvas,
-            150, 150, 750, 450,
-            radius=20,
+            50, 100, 600, 500,
+            radius=15,
             fill=self.screen_color,
             outline=self.frame_color,
-            width=3,
+            width=2,
             tags="leaderboard"
         )
         
@@ -553,13 +551,13 @@ class TypingApp:
             self.canvas,
             bg=self.screen_color
         )
-        self.canvas.create_window(450, 300, window=lb_frame, tags="leaderboard")
+        self.canvas.create_window(325, 300, window=lb_frame, tags="leaderboard")
         
         # Add title
         tk.Label(
             lb_frame,
             text="Leaderboard",
-            font=("Helvetica", 18, "bold"),
+            font=("Helvetica", 16, "bold"),
             bg=self.screen_color,
             fg=self.text_color
         ).pack(pady=5)
@@ -567,35 +565,35 @@ class TypingApp:
         # Add entries
         for idx, (name, wpm) in enumerate(self.leaderboard[:10], 1):
             entry_frame = tk.Frame(lb_frame, bg=self.screen_color)
-            entry_frame.pack(fill=tk.X, padx=20, pady=2)
+            entry_frame.pack(fill=tk.X, padx=15, pady=2)
             
             tk.Label(
                 entry_frame,
                 text=f"#{idx}",
-                font=("Helvetica", 14),
+                font=("Helvetica", 12),
                 bg=self.screen_color,
                 fg=self.text_color,
-                width=4,
+                width=3,
                 anchor=tk.W
             ).pack(side=tk.LEFT)
             
             tk.Label(
                 entry_frame,
                 text=name,
-                font=("Helvetica", 14),
+                font=("Helvetica", 12),
                 bg=self.screen_color,
                 fg=self.text_color,
-                width=20,
+                width=15,
                 anchor=tk.W
             ).pack(side=tk.LEFT)
             
             tk.Label(
                 entry_frame,
                 text=f"{wpm} WPM",
-                font=("Helvetica", 14),
+                font=("Helvetica", 12),
                 bg=self.screen_color,
                 fg=self.text_color,
-                width=10,
+                width=8,
                 anchor=tk.E
             ).pack(side=tk.RIGHT)
 
