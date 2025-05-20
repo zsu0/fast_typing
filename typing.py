@@ -7,17 +7,17 @@ class TypingApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Fast Typing")
-        self.root.geometry("700x755")  # Adjusted window size
-        self.root.configure(bg="#A6B37D")  # background
+        self.root.geometry("700x750")  # Adjusted window size
+        self.root.configure(bg="#A0C878")  # Dark green background
         
         # Color scheme
-        self.bg_color = "#C0C78C"  # Main background
-        self.screen_color = "#FEFAE0"  # screen
-        self.frame_color = "#FEFAE0"  #  outline
-        self.highlight_color = "#F4DEB3"  #  for highlight
-        self.highlight_dark = "#FF8A8A"  #  for hightlight outlines
-        self.text_color = "#74512D"  #  text
-        self.timer_color = "#B99470"  #  timer
+        self.bg_color = "#A0C878"  # Main green background
+        self.screen_color = "#FAF6E9"  # Cream screen
+        self.frame_color = "#5A8F5E"  # Dark green outline
+        self.highlight_color = "#E0B068"  # Yellow for highlight
+        self.highlight_dark = "#D9A560"  # Darker yellow for outlines
+        self.text_color = "#4B352A"  # Dark brown text
+        self.timer_color = "#FFFDF6"  # White for timer
         
         # Initialize variables
         self.words = []
@@ -71,7 +71,7 @@ class TypingApp:
             command=command,
             bg=self.highlight_color,
             fg=self.text_color,
-            activebackground="#CCE0AC",
+            activebackground="#FCEFCB",
             relief="flat",
             padx=15,
             pady=8,
