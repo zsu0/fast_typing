@@ -14,7 +14,7 @@ class TypingApp:
         self.bg_color = "#A0C878"  # Main green background
         self.screen_color = "#FAF6E9"  # Cream screen
         self.frame_color = "#5A8F5E"  # Dark green outline
-        self.highlight_color = "#F2C078"  # Yellow for highlights
+        self.highlight_color = "#E0B068"  # Yellow for hightlight
         self.highlight_dark = "#D9A560"  # Darker yellow for outlines
         self.text_color = "#4B352A"  # Dark brown text
         self.timer_color = "#FFFDF6"  # White for timer
@@ -72,7 +72,7 @@ class TypingApp:
             font=("Helvetica", 14),
             bg=self.highlight_color,
             fg=self.text_color,
-            activebackground="#E0B068",
+            activebackground="#FCEFCB",
             relief="flat",
             padx=20,
             pady=10,
@@ -101,6 +101,10 @@ class TypingApp:
     
     def show_home_page(self):
         """Display the home page with welcome message and start button"""
+        # should be big dark green canvas contain light green convas with cream outline covered the light green canvas
+        # light green canvas should display: 'Welcome' message, 'start' button, 'test your...', and 'how fast can you type?'
+        # should be able to contain every element including buttons and ranking after finished the game, be able to adjust
+        
         # Clear the canvas
         self.canvas.delete("all")
         
@@ -152,6 +156,9 @@ class TypingApp:
     
     def start_typing_test(self):
         """Initialize and show the typing test interface"""
+        # should display cream canvas inside the main canvas
+        # cream canvas display must type words
+        
         # Clear the canvas
         self.canvas.delete("all")
         
@@ -163,7 +170,8 @@ class TypingApp:
         
         random.shuffle(all_words)
         self.words = all_words
-        self.paragraphs = [self.words[i:i+10] for i in range(0, len(self.words), 10)]
+        # display 6 words per paragraph
+        self.paragraphs = [self.words[i:i+6] for i in range(0, len(self.words), 6)]
 
         self.reset_test_vars()
 
@@ -280,6 +288,9 @@ class TypingApp:
 
     def reset_test_vars(self):
         """Reset all test variables to initial state"""
+        # should reset every thing except the ranking information
+        # should hide 'try again' button and 'rank' button
+        
         self.current_paragraph_index = 0
         self.current_word_index = 0
         self.correct_count = 0
@@ -402,6 +413,9 @@ class TypingApp:
 
     def update_timer(self):
         """Update the timer and check if time is up"""
+        # should start counting instandly after user entered the first letter of the first word
+        # for example, run after 'e' in 'enlish' was entered
+        
         if not self.test_running or not self.start_time:
             return
             
@@ -513,6 +527,12 @@ class TypingApp:
 
     def show_leaderboard(self):
         """Display the leaderboard"""
+        # hide paragraphs/words to get space for ranking
+        # hide 'enter name' button or 'add to learderboard'
+        # show upto top ten ranks, any ranks lower than that need to scroll down to veiw
+        # show other users' ranks as well
+        # still display 'try again' button'
+        
         # Clear previous leaderboard display
         self.canvas.delete("leaderboard")
         
