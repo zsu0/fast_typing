@@ -7,17 +7,17 @@ class TypingApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Fast Typing")
-        self.root.geometry("700x800")  # Adjusted window size
-        self.root.configure(bg="#A0C878")  # Dark green background
+        self.root.geometry("700x770")  # Adjusted window size
+        self.root.configure(bg="#143D60")  # Dark blue background
         
         # Color scheme
-        self.bg_color = "#A0C878"  # Main green background
-        self.screen_color = "#FAF6E9"  # Cream screen
-        self.frame_color = "#5A8F5E"  # Dark green outline
-        self.highlight_color = "#E0B068"  # Yellow for highlight
-        self.highlight_dark = "#D9A560"  # Darker yellow for outlines
-        self.text_color = "#4B352A"  # Dark brown text
-        self.timer_color = "#FFFDF6"  # White for timer
+        self.bg_color = "#27667B"  # Main blue background
+        self.screen_color = "#DDEB9D"  # Green screen
+        self.frame_color = "#A0C878"  # Dark green outline
+        self.highlight_color = "#FCE7C8"  # Yellow for highlight
+        self.highlight_dark = "#DF6D14"  # Darker orange for outlines
+        self.text_color = "#F8F5E9"  # Cream text
+        self.timer_color = "#DDEB9D"  # Green for timer
         
         # Initialize variables
         self.words = []
@@ -133,7 +133,7 @@ class TypingApp:
         
         subtitle = tk.Label(
             self.canvas,
-            text="Test your typing speed in 1 minute\nHow fast can you type?", 
+            text="Test your typing speed in 1 minute\n\nHow fast can you type?", 
             font=("Helvetica", 12),
             bg=self.bg_color,
             fg=self.text_color
