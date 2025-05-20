@@ -14,7 +14,7 @@ class TypingApp:
         self.bg_color = "#A0C878"  # Main green background
         self.screen_color = "#FAF6E9"  # Cream screen
         self.frame_color = "#5A8F5E"  # Dark green outline
-        self.highlight_color = "#E0B068"  # Yellow for hightlight
+        self.highlight_color = "#E0B068"  # Yellow for highlight
         self.highlight_dark = "#D9A560"  # Darker yellow for outlines
         self.text_color = "#4B352A"  # Dark brown text
         self.timer_color = "#FFFDF6"  # White for timer
@@ -24,7 +24,7 @@ class TypingApp:
         self.paragraphs = []
         self.leaderboard = []
         
-        # Create main container (no frame needed, we'll use canvas directly)
+        # Create main canvas
         self.canvas = tk.Canvas(
             root,
             width=800,
@@ -101,10 +101,6 @@ class TypingApp:
     
     def show_home_page(self):
         """Display the home page with welcome message and start button"""
-        # should be big dark green canvas contain light green convas with cream outline covered the light green canvas
-        # light green canvas should display: 'Welcome' message, 'start' button, 'test your...', and 'how fast can you type?'
-        # should be able to contain every element including buttons and ranking after finished the game, be able to adjust
-        
         # Clear the canvas
         self.canvas.delete("all")
         
@@ -144,21 +140,9 @@ class TypingApp:
         )
         self.canvas.create_window(400, 400, window=subtitle)
         
-        # Add decorative elements
-        self.create_rounded_rectangle(
-            self.canvas,
-            300, 450, 500, 470,
-            radius=10,
-            fill=self.highlight_color,
-            outline=self.highlight_dark,
-            width=2
-        )
     
     def start_typing_test(self):
         """Initialize and show the typing test interface"""
-        # should display cream canvas inside the main canvas
-        # cream canvas display must type words
-        
         # Clear the canvas
         self.canvas.delete("all")
         
@@ -221,6 +205,7 @@ class TypingApp:
         )
         self.text_display.place(x=30, y=30, width=540, height=240)
         self.text_display.config(state=tk.DISABLED)
+        self.text_display.tag_config("highlight", background="yellow")
         
         # Countdown timer display
         self.time_label = tk.Label(
@@ -254,6 +239,7 @@ class TypingApp:
         self.input_entry.pack(padx=20, pady=10, ipady=8, ipadx=20)
         self.input_entry.bind("<space>", self.check_word)
         self.input_entry.bind("<Return>", self.check_word)
+        self.input_entry.bind("<Key>", self.start_timer_on_first_key)
         
         # Status label
         self.status_label = tk.Label(
@@ -265,32 +251,20 @@ class TypingApp:
         )
         self.canvas.create_window(400, 500, window=self.status_label)
         
-        # Result UI elements (initially hidden)
-        self.result_label = tk.Label(
-            self.canvas,
-            text="",
-            font=("Helvetica", 24, "bold"),
-            bg=self.bg_color,
-            fg=self.text_color
-        )
-        
-        self.score_label = tk.Label(
-            self.canvas,
-            text="",
-            font=("Helvetica", 16),
-            bg=self.bg_color,
-            fg=self.text_color
-        )
-        
         # Initialize test
         self.update_paragraphs()
         self.input_entry.focus_set()
 
+    def start_timer_on_first_key(self, event):
+        """Start timer when first key is pressed"""
+        if self.start_time is None and event.char and event.char.isalnum():
+            self.start_time = time.time()
+            self.update_timer()
+            # Remove this binding after first key press
+            self.input_entry.unbind("<Key>")
+
     def reset_test_vars(self):
         """Reset all test variables to initial state"""
-        # should reset every thing except the ranking information
-        # should hide 'try again' button and 'rank' button
-        
         self.current_paragraph_index = 0
         self.current_word_index = 0
         self.correct_count = 0
@@ -301,6 +275,12 @@ class TypingApp:
         self.animation_step = 0
         self.animation_running = False
         self.animation_direction = 0
+        
+        # Clear any existing result displays
+        if hasattr(self, 'result_label'):
+            self.result_label.place_forget()
+        if hasattr(self, 'score_label'):
+            self.score_label.place_forget()
 
     def update_paragraphs(self, animate=False):
         """Update the displayed paragraphs with optional animation"""
@@ -379,7 +359,6 @@ class TypingApp:
         start_index = f"1.0 + {word_pos} chars"
         end_index = f"1.0 + {word_pos + word_len} chars"
         self.text_display.tag_add("highlight", start_index, end_index)
-        self.text_display.tag_config("highlight", background="yellow")
         self.text_display.config(state=tk.DISABLED)
 
     def check_word(self, event):
@@ -387,11 +366,10 @@ class TypingApp:
         if not self.test_running or self.animation_running:
             return
             
-        if self.start_time is None:
-            self.start_time = time.time()
-            self.update_timer()
-
         typed = self.input_entry.get().strip()
+        if not typed:  # Ignore empty input
+            return
+
         current_word = self.paragraphs[self.current_paragraph_index][self.current_word_index]
 
         if typed == current_word:
@@ -413,9 +391,6 @@ class TypingApp:
 
     def update_timer(self):
         """Update the timer and check if time is up"""
-        # should start counting instandly after user entered the first letter of the first word
-        # for example, run after 'e' in 'enlish' was entered
-        
         if not self.test_running or not self.start_time:
             return
             
@@ -440,11 +415,29 @@ class TypingApp:
         self.current_wpm = int((self.correct_count / elapsed) * 60)
         total_attempted = self.correct_count + self.incorrect_count
 
-        # Display results
-        self.result_label.config(text=f"Your WPM: {self.current_wpm}")
+        # Clear previous result displays
+        if hasattr(self, 'result_label'):
+            self.result_label.place_forget()
+        if hasattr(self, 'score_label'):
+            self.score_label.place_forget()
+
+        # Create new result displays
+        self.result_label = tk.Label(
+            self.canvas,
+            text=f"Your WPM: {self.current_wpm}",
+            font=("Helvetica", 24, "bold"),
+            bg=self.bg_color,
+            fg=self.text_color
+        )
         self.canvas.create_window(400, 520, window=self.result_label)
 
-        self.score_label.config(text=f"Correct: {self.correct_count} / {total_attempted} words")
+        self.score_label = tk.Label(
+            self.canvas,
+            text=f"Correct: {self.correct_count} / {total_attempted} words",
+            font=("Helvetica", 16),
+            bg=self.bg_color,
+            fg=self.text_color
+        )
         self.canvas.create_window(400, 560, window=self.score_label)
 
         # Create action buttons with rounded corners
@@ -527,19 +520,13 @@ class TypingApp:
 
     def show_leaderboard(self):
         """Display the leaderboard"""
-        # hide paragraphs/words to get space for ranking
-        # hide 'enter name' button or 'add to learderboard'
-        # show upto top ten ranks, any ranks lower than that need to scroll down to veiw
-        # show other users' ranks as well
-        # still display 'try again' button'
-        
         # Clear previous leaderboard display
         self.canvas.delete("leaderboard")
         
         # Create rounded container
         self.create_rounded_rectangle(
             self.canvas,
-            200, 620, 600, 720,
+            200, 150, 600, 350,
             radius=20,
             fill=self.screen_color,
             outline=self.frame_color,
@@ -547,18 +534,56 @@ class TypingApp:
             tags="leaderboard"
         )
         
-        text = "Leaderboard:\n"
-        for idx, (name, wpm) in enumerate(self.leaderboard[:5], 1):
-            text += f"#{idx} {name}: {wpm} WPM\n"
-        
-        tk.Label(
+        # Create scrollable frame for leaderboard
+        lb_frame = tk.Frame(
             self.canvas,
-            text=text,
-            font=("Helvetica", 12),
+            bg=self.screen_color
+        )
+        self.canvas.create_window(400, 250, window=lb_frame, tags="leaderboard")
+        
+        # Add title
+        tk.Label(
+            lb_frame,
+            text="Leaderboard",
+            font=("Helvetica", 16, "bold"),
             bg=self.screen_color,
-            fg=self.text_color,
-            justify=tk.LEFT
-        ).place(x=400, y=670, anchor=tk.CENTER)
+            fg=self.text_color
+        ).pack(pady=5)
+        
+        # Add entries
+        for idx, (name, wpm) in enumerate(self.leaderboard[:10], 1):
+            entry_frame = tk.Frame(lb_frame, bg=self.screen_color)
+            entry_frame.pack(fill=tk.X, padx=10, pady=2)
+            
+            tk.Label(
+                entry_frame,
+                text=f"#{idx}",
+                font=("Helvetica", 12),
+                bg=self.screen_color,
+                fg=self.text_color,
+                width=4,
+                anchor=tk.W
+            ).pack(side=tk.LEFT)
+            
+            tk.Label(
+                entry_frame,
+                text=name,
+                font=("Helvetica", 12),
+                bg=self.screen_color,
+                fg=self.text_color,
+                width=20,
+                anchor=tk.W
+            ).pack(side=tk.LEFT)
+            
+            tk.Label(
+                entry_frame,
+                text=f"{wpm} WPM",
+                font=("Helvetica", 12),
+                bg=self.screen_color,
+                fg=self.text_color,
+                width=10,
+                anchor=tk.E
+            ).pack(side=tk.RIGHT)
 
     def reset_test(self):
         """Reset the test to start again"""
