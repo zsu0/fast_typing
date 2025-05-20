@@ -346,6 +346,10 @@ class TypingApp:
 
     def highlight_current_word(self):
         """Highlight the current word that needs to be typed"""
+        # just in case user type too fast
+        if self.current_paragraph_index >= len(self.paragraphs):
+            return
+            
         self.text_display.config(state=tk.NORMAL)
         self.text_display.tag_remove("highlight", "1.0", tk.END)
 
@@ -524,6 +528,9 @@ class TypingApp:
     def submit_leaderboard_name(self):
         """Handle leaderboard name submission"""
         name = self.name_entry.get().strip()
+        if name in [entry[0] for entry in self.leaderboard]:
+            tk.messagebox.showerror("Duplicate Name", "This name is already on the leaderboard.")
+            return
         if name:
             self.leaderboard.append((name, self.current_wpm))
             self.leaderboard.sort(key=lambda x: x[1], reverse=True)
