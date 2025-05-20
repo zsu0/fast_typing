@@ -11,7 +11,7 @@ class TypingApp:
         self.root.configure(bg="#A0C878")  # Dark green background
         
         # Color scheme
-        self.bg_color = "#A0C878"  # Main green background
+        self.bg_color = "#DDEB9D"  # Main green background
         self.screen_color = "#FAF6E9"  # Cream screen
         self.frame_color = "#5A8F5E"  # Dark green outline
         self.highlight_color = "#E0B068"  # Yellow for highlight
