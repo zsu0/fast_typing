@@ -8,15 +8,15 @@ class TypingApp:
         self.root = root
         self.root.title("Fast Typing")
         self.root.geometry("900x700")
-        self.root.configure(bg="#333333")
+        self.root.configure(bg="#A0C878")
         
         # Color scheme
-        self.bg_color = "#A0C878"  # Greenish background (big canvas)
+        self.bg_color = "#DDEB9D"  # Main background color
         self.screen_color = "#FAF6E9"  # Cream screen (small canvas)
-        self.frame_color = "#555555"  # Dark frame color
-        self.highlight_color = "#FFD166"  # Yellow for highlights
-        self.text_color = "#333333"  # Dark text
-        self.timer_color = "#EF476F"  # Red for timer
+        self.frame_color = "#555555"  # Dark frame color, canvas's frame
+        self.highlight_color = "#F2C078"  # Yellow for highlights
+        self.text_color = "#4B352A"  # Dark brown text
+        self.timer_color = "#FFFDF6"  # White for timer
         
         # Initialize variables
         self.words = []
@@ -24,7 +24,7 @@ class TypingApp:
         self.leaderboard = []
         
         # Create main container
-        self.main_frame = tk.Frame(root, bg="#333333")
+        self.main_frame = tk.Frame(root, bg="#333333") 
         self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
         # Show home page initially
@@ -234,6 +234,68 @@ class TypingApp:
         )
         self.big_canvas.create_window(400, 500, window=self.status_label)
         
+        # Result UI elements (initially hidden)
+        self.result_label = tk.Label(
+            self.big_canvas,
+            text="",
+            font=("Helvetica", 24, "bold"),
+            bg=self.bg_color,
+            fg=self.text_color
+        )
+        
+        self.score_label = tk.Label(
+            self.big_canvas,
+            text="",
+            font=("Helvetica", 16),
+            bg=self.bg_color,
+            fg=self.text_color
+        )
+        
+        self.leaderboard_button = tk.Button(
+            self.big_canvas,
+            text="Add to Leaderboard",
+            command=self.enter_leaderboard,
+            font=("Helvetica", 14),
+            bg=self.highlight_color,
+            fg=self.text_color,
+            relief="flat",
+            padx=20,
+            pady=5
+        )
+        
+        self.try_again_button = tk.Button(
+            self.big_canvas,
+            text="Try Again",
+            command=self.reset_test,
+            font=("Helvetica", 14),
+            bg=self.highlight_color,
+            fg=self.text_color,
+            relief="flat",
+            padx=20,
+            pady=5
+        )
+        
+        self.back_to_home_button = tk.Button(
+            self.big_canvas,
+            text="Back to Home",
+            command=self.show_home_page,
+            font=("Helvetica", 14),
+            bg=self.highlight_color,
+            fg=self.text_color,
+            relief="flat",
+            padx=20,
+            pady=5
+        )
+        
+        self.leaderboard_display = tk.Label(
+            self.big_canvas,
+            text="",
+            font=("Helvetica", 12),
+            bg=self.bg_color,
+            fg=self.text_color,
+            justify=tk.LEFT
+        )
+        
         # Initialize test
         self.update_paragraphs()
         self.input_entry.focus_set()
@@ -301,11 +363,8 @@ class TypingApp:
         self.animation_step += 1
         scroll_amount = 0.2  # Smaller steps for smoother animation
         
-        # Get current first line position
-        first_line_pos = float(self.text_display.index("1.0").split('.')[0])
-        
         # Scroll up
-        self.text_display.yview_moveto(first_line_pos + scroll_amount)
+        self.text_display.yview_scroll(1, tk.UNITS)
         
         if self.animation_step < 5:  # Adjust number of steps for animation duration
             self.root.after(50, self.perform_animation)
@@ -341,7 +400,7 @@ class TypingApp:
             
         if self.start_time is None:
             self.start_time = time.time()
-            self.timer_id = self.root.after(1000, self.update_timer)
+            self.update_timer()
 
         typed = self.input_entry.get().strip()
         current_word = self.paragraphs[self.current_paragraph_index][self.current_word_index]
@@ -373,6 +432,8 @@ class TypingApp:
             self.end_test()
         else:
             remaining = 60 - int(elapsed)
+            mins, secs = divmod(remaining, 60)
+            self.time_label.config(text=f"{mins:02d}:{secs:02d}")
             self.status_label.config(text=f"Time remaining: {remaining} seconds")
             self.timer_id = self.root.after(1000, self.update_timer)
 
@@ -388,23 +449,28 @@ class TypingApp:
         total_attempted = self.correct_count + self.incorrect_count
 
         self.result_label.config(text=f"Your WPM: {self.current_wpm}")
-        self.result_label.pack(pady=10)
+        self.big_canvas.create_window(400, 520, window=self.result_label)
 
         self.score_label.config(text=f"Correct: {self.correct_count} / {total_attempted} words in 1 minute")
-        self.score_label.pack(pady=5)
+        self.big_canvas.create_window(400, 560, window=self.score_label)
 
-        self.leaderboard_button.pack(pady=5)
-        self.try_again_button.pack(pady=5)
-        self.back_to_home_button.pack(pady=5)
+        self.big_canvas.create_window(400, 600, window=self.leaderboard_button)
+        self.big_canvas.create_window(400, 640, window=self.try_again_button)
+        self.big_canvas.create_window(400, 680, window=self.back_to_home_button)
+        
+        self.time_label.config(text="00:00")
         self.status_label.config(text="Time's up!")
 
     def enter_leaderboard(self):
         """Show dialog to enter name for leaderboard"""
         name_window = tk.Toplevel(self.root)
         name_window.title("Enter Name")
-        tk.Label(name_window, text="Enter your name:").pack()
-        name_entry = tk.Entry(name_window)
-        name_entry.pack()
+        name_window.geometry("300x150")
+        name_window.resizable(False, False)
+        
+        tk.Label(name_window, text="Enter your name:", font=("Helvetica", 12)).pack(pady=10)
+        name_entry = tk.Entry(name_window, font=("Helvetica", 12))
+        name_entry.pack(pady=5)
 
         def submit_name():
             name = name_entry.get().strip()
@@ -414,15 +480,24 @@ class TypingApp:
                 self.show_leaderboard()
             name_window.destroy()
 
-        tk.Button(name_window, text="Submit", command=submit_name).pack()
+        submit_btn = tk.Button(
+            name_window,
+            text="Submit",
+            command=submit_name,
+            font=("Helvetica", 12),
+            bg=self.highlight_color,
+            fg=self.text_color
+        )
+        submit_btn.pack(pady=10)
 
     def show_leaderboard(self):
         """Display the leaderboard"""
         text = "Leaderboard:\n"
         for idx, (name, wpm) in enumerate(self.leaderboard[:10], 1):
             text += f"#{idx} {name} - {wpm} WPM\n"
+        
         self.leaderboard_display.config(text=text)
-        self.leaderboard_display.pack()
+        self.big_canvas.create_window(400, 720, window=self.leaderboard_display)
 
     def reset_test(self):
         """Reset the test to start again"""
@@ -433,12 +508,15 @@ class TypingApp:
         self.input_entry.config(state=tk.NORMAL)
         self.input_entry.delete(0, tk.END)
 
-        self.result_label.pack_forget()
-        self.score_label.pack_forget()
-        self.leaderboard_button.pack_forget()
-        self.try_again_button.pack_forget()
-        self.back_to_home_button.pack_forget()
-        self.leaderboard_display.pack_forget()
+        # Hide result elements
+        self.big_canvas.delete(self.result_label)
+        self.big_canvas.delete(self.score_label)
+        self.big_canvas.delete(self.leaderboard_button)
+        self.big_canvas.delete(self.try_again_button)
+        self.big_canvas.delete(self.back_to_home_button)
+        self.big_canvas.delete(self.leaderboard_display)
+        
+        self.time_label.config(text="01:00")
         self.status_label.config(text="")
 
         self.update_paragraphs()
