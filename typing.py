@@ -525,23 +525,26 @@ class TypingApp:
         )
         submit_btn.place(x=140, y=100, anchor=tk.CENTER)
 
-        self.warning_label = tk.Label(
-            lb_canvas,
-            text="",
-            font=("Helvetica", 10),
-            fg="red",
-            bg=self.screen_color
-        )
-        self.warning_label.place(x=140, y=115, anchor=tk.CENTER)
-
     def submit_leaderboard_name(self):
         """Handle leaderboard name submission"""
         name = self.name_entry.get().strip()
         # check duplicate names
         if name in [entry[0] for entry in self.leaderboard]:
+        if not hasattr(self, 'warning_label'):
+            self.warning_label = tk.Label(
+                self.name_window,
+                text="Please use another name.",
+                font=("Helvetica", 10),
+                fg="red",
+                bg=self.screen_color
+            )
+            self.warning_label.place(x=140, y=115, anchor=tk.CENTER)
+        else:
             self.warning_label.config(text="Please use another name.")
-            return
-        self.warning_label.config(text="")
+        return
+
+    if hasattr(self, 'warning_label'):
+        self.warning_label.destroy()
         
         if name:
             self.leaderboard.append((name, self.current_wpm))
