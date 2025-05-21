@@ -325,7 +325,9 @@ class TypingApp:
         self.perform_animation()
 
     def perform_animation(self):
-        """Perform the scrolling animation step by step"""
+        """Perform the scrolling animation, aka delay a bit for human to see"""
+        # Idk what it's called, so yeah
+        
         if not self.animation_running:
             return
             
