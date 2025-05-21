@@ -530,21 +530,21 @@ class TypingApp:
         name = self.name_entry.get().strip()
         # check duplicate names
         if name in [entry[0] for entry in self.leaderboard]:
-        if not hasattr(self, 'warning_label'):
-            self.warning_label = tk.Label(
-                self.name_window,
-                text="Please use another name.",
-                font=("Helvetica", 10),
-                fg="red",
-                bg=self.screen_color
-            )
-            self.warning_label.place(x=140, y=115, anchor=tk.CENTER)
-        else:
-            self.warning_label.config(text="Please use another name.")
-        return
+            if not hasattr(self, 'warning_label'):
+                self.warning_label = tk.Label(
+                    self.name_window,
+                    text="Please use another name.",
+                    font=("Helvetica", 10),
+                    fg="red",
+                    bg=self.screen_color
+                )
+                self.warning_label.place(x=140, y=115, anchor=tk.CENTER)
+            else:
+                self.warning_label.config(text="Please use another name.")
+            return
 
-    if hasattr(self, 'warning_label'):
-        self.warning_label.destroy()
+        if hasattr(self, 'warning_label'):
+            self.warning_label.destroy()
         
         if name:
             self.leaderboard.append((name, self.current_wpm))
